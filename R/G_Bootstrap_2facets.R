@@ -121,7 +121,7 @@ CalcGTheoryCI <- function(Data, B = 1000, type){
   np <- nlevels(Data$p)
   ni <- nlevels(Data$i)
   no <- nlevels(Data$o)
-  
+
   results <- NULL
   registerDoParallel(cores = 4)
   r <- foreach(icount(B), .combine = rbind) %dopar% {
@@ -135,7 +135,7 @@ CalcGTheoryCI <- function(Data, B = 1000, type){
       boot_data$p <- Data[order(Data$p),]$p
       #Compute estimated variance components
       boot_var <- calcVarComp(boot_data)
-      #Compute adjusted variance component estimates 
+      #Compute adjusted variance component estimates
       boot_AdjVar <- calcAdjustedVar(boot_data, boot_var[1], boot_var[2], boot_var[3], boot_var[4], boot_var[5], boot_var[6], boot_var[7], type = "p")
     }
     if (type == "i"){
@@ -148,7 +148,7 @@ CalcGTheoryCI <- function(Data, B = 1000, type){
       boot_data$i <- Data[order(Data$i),]$i
       #Compute estimated variance components
       boot_var <- calcVarComp(boot_data)
-      #Compute adjusted variance component estimates 
+      #Compute adjusted variance component estimates
       boot_AdjVar <- calcAdjustedVar(boot_data, boot_var[1], boot_var[2], boot_var[3], boot_var[4], boot_var[5], boot_var[6], boot_var[7], type = "i")
     }
     if (type == "o"){
@@ -165,72 +165,102 @@ CalcGTheoryCI <- function(Data, B = 1000, type){
       boot_AdjVar <- calcAdjustedVar(boot_data, boot_var[1], boot_var[2], boot_var[3], boot_var[4], boot_var[5], boot_var[6], boot_var[7], type = "o")
     }
     if (type == "pi"){
-      ##Get indices for p
-      #boot-p
-      boot_indices <- sample(1:np,np,replace = T)
-      boot_sample <- unlist(sapply(boot_indices,function(x) which(Data$p == x)))
-      boot_data <- Data[boot_sample,]
+      ##Get indices for p and i
+      boot_indices_p <- sample(1:np,np,replace = T)
+      boot_indices_i <- sample(1:ni,ni,replace = T)
+      #draw person
+      boot_sample_p <- unlist(sapply(boot_indices_p,function(x) which(Data$p == x)))
+      boot_data_p <- Data[boot_sample_p,]
       #re-index person
-      boot_data$p <- Data$p
+      boot_data_p$p <- Data[order(Data$p),]$p
+      #draw item
+      boot_sample <- unlist(sapply(boot_indices_i,function(x) which(boot_data_p$i == x)))
+      boot_data <- boot_data_p[boot_sample,]
+      #re-index item
+      boot_data$i <- Data[order(Data$i),]$i
       #Compute estimated variance components
       boot_var <- calcVarComp(boot_data)
-      #Compute adjusted variance component estimates 
+      #Compute adjusted variance component estimates
       boot_AdjVar <- calcAdjustedVar(boot_data, boot_var[1], boot_var[2], boot_var[3], boot_var[4], boot_var[5], boot_var[6], boot_var[7], type = "pi")
     }
     if (type == "po"){
-      ##Get indices for p
-      #boot-p
-      boot_indices <- sample(1:np,np,replace = T)
-      boot_sample <- unlist(sapply(boot_indices,function(x) which(Data$p == x)))
-      boot_data <- Data[boot_sample,]
+      ##Get indices for p and o
+      boot_indices_p <- sample(1:np,np,replace = T)
+      boot_indices_o <- sample(1:no,no,replace = T)
+      #draw person
+      boot_sample_p <- unlist(sapply(boot_indices_p,function(x) which(Data$p == x)))
+      boot_data_p <- Data[boot_sample_p,]
       #re-index person
-      boot_data$p <- Data$p
+      boot_data_p$p <- Data[order(Data$p),]$p
+      #draw occasion
+      boot_sample <- unlist(sapply(boot_indices_o,function(x) which(boot_data_p$o == x)))
+      boot_data <- boot_data_p[boot_sample,]
+      #re-index item
+      boot_data$o <- Data[order(Data$o),]$o
       #Compute estimated variance components
       boot_var <- calcVarComp(boot_data)
-      #Compute adjusted variance component estimates 
+      #Compute adjusted variance component estimates
       boot_AdjVar <- calcAdjustedVar(boot_data, boot_var[1], boot_var[2], boot_var[3], boot_var[4], boot_var[5], boot_var[6], boot_var[7], type = "po")
     }
     if (type == "io"){
-      ##Get indices for p
-      #boot-p
-      boot_indices <- sample(1:np,np,replace = T)
-      boot_sample <- unlist(sapply(boot_indices,function(x) which(Data$p == x)))
-      boot_data <- Data[boot_sample,]
-      #re-index person
-      boot_data$p <- Data$p
+      ##Get indices for i and o
+      boot_indices_i <- sample(1:ni,ni,replace = T)
+      boot_indices_o <- sample(1:no,no,replace = T)
+      #draw item
+      boot_sample_i <- unlist(sapply(boot_indices_i,function(x) which(Data$i == x)))
+      boot_data_i <- Data[boot_sample_i,]
+      #re-index item
+      boot_data_i$i <- Data[order(Data$i),]$i
+      #draw occasion
+      boot_sample <- unlist(sapply(boot_indices_o,function(x) which(boot_data_i$o == x)))
+      boot_data <- boot_data_i[boot_sample,]
+      #re-index occasion
+      boot_data$o <- Data[order(Data$o),]$o
       #Compute estimated variance components
       boot_var <- calcVarComp(boot_data)
-      #Compute adjusted variance component estimates 
+      #Compute adjusted variance component estimates
       boot_AdjVar <- calcAdjustedVar(boot_data, boot_var[1], boot_var[2], boot_var[3], boot_var[4], boot_var[5], boot_var[6], boot_var[7], type = "io")
     }
     if (type == "pio"){
-      ##Get indices for p
-      #boot-p
-      boot_indices <- sample(1:np,np,replace = T)
-      boot_sample <- unlist(sapply(boot_indices,function(x) which(Data$p == x)))
-      boot_data <- Data[boot_sample,]
+      ##Get indices for pio
+      boot_indices_p <- sample(1:np,np,replace = T)
+      boot_indices_i <- sample(1:ni,ni,replace = T)
+      boot_indices_o <- sample(1:no,no,replace = T)
+      #draw person
+      boot_sample_p <- unlist(sapply(boot_indices_p,function(x) which(Data$p == x)))
+      boot_data_p <- Data[boot_sample_p,]
       #re-index person
-      boot_data$p <- Data$p
+      boot_data_p$p <- Data[order(Data$p),]$p
+      #draw item
+      boot_sample_pi <- unlist(sapply(boot_indices_i,function(x) which(boot_data_p$i == x)))
+      boot_data_pi <- boot_data_p[boot_sample_pi,]
+      #re-index item
+      boot_data_pi$i <- Data[order(Data$i),]$i
+      #draw occasion
+      boot_sample <- unlist(sapply(boot_indices_o,function(x) which(boot_data_pi$o == x)))
+      boot_data <- boot_data_pi[boot_sample,]
+      #re-index occasion
+      boot_data$o <- Data[order(Data$o),]$o
       #Compute estimated variance components
       boot_var <- calcVarComp(boot_data)
-      #Compute adjusted variance component estimates 
+      #Compute adjusted variance component estimates
       boot_AdjVar <- calcAdjustedVar(boot_data, boot_var[1], boot_var[2], boot_var[3], boot_var[4], boot_var[5], boot_var[6], boot_var[7], type = "pio")
     }
-   
+
     ##Compute D-study coefficients
     boot_AbsErrVar <- boot_AdjVar[2]/ni + boot_AdjVar[3]/no + boot_AdjVar[4]/ni + boot_AdjVar[5]/no + boot_AdjVar[6]/(ni*no) + boot_AdjVar[7]/(ni*no)
     boot_GenCoef <-  boot_AdjVar[1]/(boot_AdjVar[1] + boot_AdjVar[4]/ni + boot_AdjVar[5]/no + boot_AdjVar[7]/(ni*no))
     boot_DepCoef <- boot_AdjVar[1]/(boot_AdjVar[1] + boot_AbsErrVar)
-    
+
     #Accumulate results such that cols 1-10 are boot-p varp,vari,varo,varpi,varpo,vario,varpio, AbsErrVar,GenCoef,DepCoef
     result <- c(boot_AdjVar, boot_AbsErrVar, boot_GenCoef, boot_DepCoef)
     result
   }
   results <- rbind(results, r)
   return(results)
-}  
+}
 
-summaryCI <- function(.result, ConfLevel, rounding){  
+summaryCI <- function(.result, ConfLevel, rounding){
   #GstudyEstimates (means and standard error)
   means <- colMeans(.result)
   sds <- apply(.result, 2, sd)
@@ -253,8 +283,6 @@ summaryCI <- function(.result, ConfLevel, rounding){
   colnames(dstudy_cis) <- c("AbsErrVar_SE", "GenCoef_SE", "DepCoef_SE")
   #rownames(dstudy_cis) <- c("boot-p")
   #Return four matrices in a named list
-  return(list(Gstudy_Estimates = gstudy_est, Gstudy_Intervals = gstudy_cis, 
+  return(list(Gstudy_Estimates = gstudy_est, Gstudy_Intervals = gstudy_cis,
               Dstudy_Estimates = dstudy_est, Dstudy_Intervals = dstudy_cis))
 }
-
-
