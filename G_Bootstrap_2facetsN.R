@@ -210,19 +210,23 @@ summaryCI <- function(.result, ConfLevel, rounding) {
   colnames(gstudy_est) <- c("p Var", "o Var", "po Var",
                             "i:o Var", "ResidVar", "p Var_SE", "o Var_SE",
                             "po Var_SE", "i:o Var_SE", "ResidVar_SE")
+  rownames(gstudy_est) <- c("value")
   # CIs
   lb_g <- round(apply(.result, 2, quantile, probs = (1 - ConfLevel)/2, names = F), rounding)
   ub_g <- round(apply(.result, 2, quantile, probs = (1 - (1 - ConfLevel)/2), names = F), rounding)
   gstudy_cis_vec <- noquote(paste0("(", lb_g, ", ", ub_g, ")"))
   gstudy_cis <- rbind(gstudy_cis_vec[1:5])
   colnames(gstudy_cis) <- c("p Var", "o Var", "po Var", "i:o Var", "ResidVar")
+  rownames(gstudy_cis) <- c("CI")
   # DstudyEstimates (mean and standard error)
   dstudy_est <- round(rbind(c(means[6:8], sds[6:8])), 4)
   colnames(dstudy_est) <- c("AbsErrVar", "GenCoef", "DepCoef", "AbsErrVar_SE", "GenCoef_SE",
                             "DepCoef_SE")
+  rownames(dstudy_est) <- c("value")
   # DstudyCIs
   dstudy_cis <- rbind(gstudy_cis_vec[6:8])
   colnames(dstudy_cis) <- c("AbsErrVar_SE", "GenCoef_SE", "DepCoef_SE")
+  rownames(dstudy_cis) <- c("CI")
   # Return four matrices in a named list
   return(list(Gstudy_Estimates = gstudy_est, Gstudy_Intervals = gstudy_cis, Dstudy_Estimates = dstudy_est,
               Dstudy_Intervals = dstudy_cis))
