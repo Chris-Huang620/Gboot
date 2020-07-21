@@ -1,7 +1,7 @@
 library(foreach)
 library(parallel)
 library(doParallel)
-
+set.seed(123)
 # Create two-facet crossed simulated data set called sim_data persons x items x raters (in
 # Brennan and Tong 2004, r = h) set sample sizes
 np <- 100
@@ -28,7 +28,7 @@ results_all <- NULL
 registerDoParallel(cores = 4)
 
 ptm <- proc.time()
-r <- foreach(icount(10), .combine = rbind) %dopar% {
+r <- foreach(icount(100), .combine = rbind) %dopar% {
     # Create random effects (generate new for each replication)
     Zp <- rnorm(np, 0, 1)
     Zi <- rnorm(ni, 0, 1)
