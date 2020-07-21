@@ -28,7 +28,7 @@ results_all <- NULL
 registerDoParallel(cores = 4)
 
 ptm <- proc.time()
-r <- foreach(icount(30), .combine = rbind) %dopar% {
+r <- foreach(icount(10), .combine = rbind) %dopar% {
     # Create random effects (generate new for each replication)
     Zp <- rnorm(np, 0, 1)
     Zi <- rnorm(ni, 0, 1)
@@ -53,5 +53,10 @@ r <- foreach(icount(30), .combine = rbind) %dopar% {
 }
 results_all <- rbind(results_all, r)
 
-colMeans(results_all)
+sim_result <- rbind(c(colMeans(results_all)))
+colnames(sim_result) <- c("p Var", "i Var", "o Var", "pi Var", "po Var",
+                          "io Var", "ResidVar", "p Var_SE", "i Var_SE", "o Var_SE", "pi Var_SE",
+                          "po Var_SE", "io Var_SE", "ResidVar_SE")
+rownames(sim_result) <- c("value")
+list(sim_result)
 proc.time() - ptm
